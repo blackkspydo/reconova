@@ -25,7 +25,7 @@
 | 8 | Integrations | `08-integrations.md` | Pending |
 | 9 | Super Admin & Operations | `09-super-admin-operations.md` | Pending |
 | 10 | Data, Audit & Platform Compliance | `10-data-audit-platform-compliance.md` | Pending |
-| 11 | System Configuration Reference | `11-system-configuration.md` | Pending |
+| 11 | [System Configuration Reference](./11-system-configuration.md) | `11-system-configuration.md` | Done |
 | 12 | [Error Response Schema](./12-error-response-schema.md) | `12-error-response-schema.md` | Done |
 | 13 | [Version History & Versioning Strategy](./13-version-history.md) | `13-version-history.md` | Done |
 
