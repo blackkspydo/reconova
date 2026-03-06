@@ -21,10 +21,10 @@
 | 4 | [Scanning & Workflows](./04-scanning-workflows.md) | `04-scanning-workflows.md` | Done |
 | 5 | [Feature Flags & Access Control](./05-feature-flags-access-control.md) | `05-feature-flags-access-control.md` | Done |
 | 6 | [Compliance Engine](./06-compliance-engine.md) | `06-compliance-engine.md` | Done |
-| 7 | CVE Monitoring | `07-cve-monitoring.md` | Pending |
+| 7 | [CVE Monitoring](./07-cve-monitoring.md) | `07-cve-monitoring.md` | Done |
 | 8 | Integrations | `08-integrations.md` | Pending |
 | 9 | Super Admin & Operations | `09-super-admin-operations.md` | Pending |
-| 10 | Data, Audit & Platform Compliance | `10-data-audit-platform-compliance.md` | Pending |
+| 10 | [Data, Audit & Platform Compliance](./10-data-audit-platform-compliance.md) | `10-data-audit-platform-compliance.md` | Done |
 | 11 | [System Configuration Reference](./11-system-configuration.md) | `11-system-configuration.md` | Done |
 | 12 | [Error Response Schema](./12-error-response-schema.md) | `12-error-response-schema.md` | Done |
 | 13 | [Version History & Versioning Strategy](./13-version-history.md) | `13-version-history.md` | Done |
