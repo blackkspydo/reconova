@@ -20,14 +20,14 @@
 | 3 | [Billing & Credits](./03-billing-credits.md) | `03-billing-credits.md` | Done |
 | 4 | [Scanning & Workflows](./04-scanning-workflows.md) | `04-scanning-workflows.md` | Done |
 | 5 | [Feature Flags & Access Control](./05-feature-flags-access-control.md) | `05-feature-flags-access-control.md` | Done |
-| 6 | Compliance Engine | `06-compliance-engine.md` | Pending |
+| 6 | [Compliance Engine](./06-compliance-engine.md) | `06-compliance-engine.md` | Done |
 | 7 | CVE Monitoring | `07-cve-monitoring.md` | Pending |
 | 8 | Integrations | `08-integrations.md` | Pending |
 | 9 | Super Admin & Operations | `09-super-admin-operations.md` | Pending |
 | 10 | Data, Audit & Platform Compliance | `10-data-audit-platform-compliance.md` | Pending |
 | 11 | System Configuration Reference | `11-system-configuration.md` | Pending |
 | 12 | Error Response Schema | `12-error-response-schema.md` | Pending |
-| 13 | Version History | `13-version-history.md` | Pending |
+| 13 | [Version History & Versioning Strategy](./13-version-history.md) | `13-version-history.md` | Done |
 
 ---
 
