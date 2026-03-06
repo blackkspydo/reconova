@@ -23,7 +23,7 @@
 | 6 | [Compliance Engine](./06-compliance-engine.md) | `06-compliance-engine.md` | Done |
 | 7 | [CVE Monitoring](./07-cve-monitoring.md) | `07-cve-monitoring.md` | Done |
 | 8 | Integrations | `08-integrations.md` | Pending |
-| 9 | Super Admin & Operations | `09-super-admin-operations.md` | Pending |
+| 9 | [Super Admin & Operations](./09-super-admin-operations.md) | `09-super-admin-operations.md` | Done |
 | 10 | [Data, Audit & Platform Compliance](./10-data-audit-platform-compliance.md) | `10-data-audit-platform-compliance.md` | Done |
 | 11 | [System Configuration Reference](./11-system-configuration.md) | `11-system-configuration.md` | Done |
 | 12 | [Error Response Schema](./12-error-response-schema.md) | `12-error-response-schema.md` | Done |
