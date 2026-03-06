@@ -39,6 +39,7 @@ Reconova uses two types of feature flags:
 | `notification_jira` | notifications | No | No | Yes | Jira ticket creation |
 | `notification_webhook` | notifications | No | No | Yes | Custom webhook notifications |
 | `notification_siem` | notifications | No | No | Yes | SIEM integration forwarding |
+| `cve_monitoring` | monitoring | No | Yes | Yes | CVE feed monitoring and vulnerability alerts |
 
 #### Master Flag Registry — Operational Flags
 
@@ -126,6 +127,7 @@ This subsection defines how plan tiers map to feature flags and how that mapping
 | `notification_jira` | No | No | No | Yes |
 | `notification_webhook` | No | No | No | Yes |
 | `notification_siem` | No | No | No | Yes |
+| `cve_monitoring` | No | No | Yes | Yes |
 
 > **Free tier:** All subscription flags are `No`. Free tenants have read-only access to existing scan results only (see §2.7 Subscription Expiry).
 
