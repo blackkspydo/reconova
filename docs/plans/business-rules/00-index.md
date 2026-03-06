@@ -16,10 +16,10 @@
 | # | Section | File | Status |
 |---|---------|------|--------|
 | 1 | [Authentication & Account Security](./01-authentication-account-security.md) | `01-authentication-account-security.md` | Done |
-| 2 | Tenant Management | `02-tenant-management.md` | Pending |
-| 3 | Billing & Credits | `03-billing-credits.md` | Pending |
-| 4 | Scanning & Workflows | `04-scanning-workflows.md` | Pending |
-| 5 | Feature Flags & Access Control | `05-feature-flags-access-control.md` | Pending |
+| 2 | [Tenant Management](./02-tenant-management.md) | `02-tenant-management.md` | Done |
+| 3 | [Billing & Credits](./03-billing-credits.md) | `03-billing-credits.md` | Done |
+| 4 | [Scanning & Workflows](./04-scanning-workflows.md) | `04-scanning-workflows.md` | Done |
+| 5 | [Feature Flags & Access Control](./05-feature-flags-access-control.md) | `05-feature-flags-access-control.md` | Done |
 | 6 | Compliance Engine | `06-compliance-engine.md` | Pending |
 | 7 | CVE Monitoring | `07-cve-monitoring.md` | Pending |
 | 8 | Integrations | `08-integrations.md` | Pending |
@@ -28,6 +28,19 @@
 | 11 | System Configuration Reference | `11-system-configuration.md` | Pending |
 | 12 | Error Response Schema | `12-error-response-schema.md` | Pending |
 | 13 | Version History | `13-version-history.md` | Pending |
+
+---
+
+## Conventions
+
+### Database Enum Convention
+
+**Never use database-level enum types.** Store all status/type values as `string` columns with a `CHECK` constraint listing valid values. Define enums in application code (e.g., C# `enum`) and stringify before persisting. This avoids migration headaches when enum values change.
+
+Example:
+- **Database column:** `status string NOT NULL CHECK (status IN ('ACTIVE', 'SUSPENDED', 'DEACTIVATED'))`
+- **Application code:** `public enum TenantStatus { Active, Suspended, Deactivated }`
+- **Persistence:** Stringify the enum before saving → `status = tenantStatus.ToString().ToUpper()`
 
 ---
 

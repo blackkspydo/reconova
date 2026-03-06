@@ -62,8 +62,8 @@
 | `password_hash` | string | BCrypt hash with cost factor 12. Never stored as plaintext. |
 | `two_factor_secret` | string | 20-byte Base32-encoded TOTP secret. Encrypted at rest with AES-256. Nullable (null until enrollment). |
 | `two_factor_enabled` | boolean | Default false. Set true after successful TOTP verification during enrollment. |
-| `role` | enum | `TENANT_OWNER` or `SUPER_ADMIN`. Default: `TENANT_OWNER`. Immutable after creation except by super admin. |
-| `status` | enum | `PENDING_2FA`, `ACTIVE`, `LOCKED`, `PASSWORD_EXPIRED`, `DEACTIVATED`. |
+| `role` | string | CHECK (`TENANT_OWNER`, `SUPER_ADMIN`). Default: `TENANT_OWNER`. Immutable after creation except by super admin. |
+| `status` | string | CHECK (`PENDING_2FA`, `ACTIVE`, `LOCKED`, `PASSWORD_EXPIRED`, `DEACTIVATED`). |
 | `created_at` | datetime | UTC. Set on creation. Immutable. |
 | `password_changed_at` | datetime | UTC. Updated on every password change. Used for 90-day rotation check. |
 | `failed_login_count` | integer | 0–3. Reset to 0 on successful login. Incremented on failed attempt. At 3, account locks. |
