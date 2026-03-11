@@ -13,6 +13,10 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Bind to PORT environment variable if set (required by Render, Fly.io, etc.)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://+:{port}");
+
 // Serilog
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -109,10 +113,19 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? ["http://localhost:3000"])
+        var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? ["http://localhost:3000"];
+        policy.WithOrigins(origins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
+    });
+
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -126,11 +139,17 @@ builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 // Auto-apply database migrations on startup
-using (var scope = app.Services.CreateScope())
+try
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ControlDbContext>();
+    Log.Information("Applying database migrations...");
     db.Database.Migrate();
     Log.Information("Database migrations applied successfully");
+}
+catch (Exception ex)
+{
+    Log.Error(ex, "Failed to apply database migrations. The application will continue but some features may not work.");
 }
 
 // Middleware pipeline
@@ -151,7 +170,7 @@ if (app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-app.UseCors("AllowFrontend");
+app.UseCors(app.Environment.IsDevelopment() ? "AllowFrontend" : "AllowAll");
 
 app.UseAuthentication();
 app.UseMiddleware<TenantResolutionMiddleware>();
