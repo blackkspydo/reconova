@@ -92,6 +92,9 @@ public class AuthService : IAuthService
         if (await _context.Users.AnyAsync(u => u.Email == emailLower, cancellationToken))
             throw new ConflictException("EMAIL_EXISTS", "Email is already registered.");
 
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+        // Step 1: Create user without tenant reference
         var user = new User
         {
             Email = emailLower,
@@ -104,7 +107,9 @@ public class AuthService : IAuthService
         };
 
         _context.Users.Add(user);
+        await _context.SaveChangesAsync(cancellationToken);
 
+        // Step 2: Create tenant referencing the user
         var slug = request.CompanyName?.ToLowerInvariant().Replace(" ", "-") ?? emailLower.Split('@')[0];
         var tenant = new Tenant
         {
@@ -116,6 +121,9 @@ public class AuthService : IAuthService
         };
 
         _context.Tenants.Add(tenant);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // Step 3: Link user to tenant and add password history
         user.TenantId = tenant.Id;
 
         _context.PasswordHistories.Add(new PasswordHistory
@@ -125,6 +133,7 @@ public class AuthService : IAuthService
         });
 
         await _context.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
