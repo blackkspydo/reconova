@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__ControlDb=Host=postgres;Port=5432;Database=reconova_control;Username=reconova;Password=reconova_dev
+      - Redis__ConnectionString=redis:6379
+      - Jwt__Secret=dev-secret-key-minimum-32-characters-long-for-testing-only
+      - Jwt__Issuer=Reconova
+      - Jwt__Audience=Reconova.Client
+      - TenantDatabase__DefaultHost=postgres
+      - TenantDatabase__DefaultPort=5432
+      - TenantDatabase__AdminUsername=reconova
+      - TenantDatabase__AdminPassword=reconova_dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: reconova
+      POSTGRES_PASSWORD: reconova_dev
+      POSTGRES_DB: reconova_control
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reconova -d reconova_control"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

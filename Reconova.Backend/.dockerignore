@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/out/
+**/.vs/
+**/.idea/
+**/node_modules/
+**/*.user
+**/*.suo
+**/logs/
+.git
+tests/
+*.md
+docker-compose.yml
+fly.toml
