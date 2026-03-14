@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { getAuthStore } from '$lib/stores/auth';
 
+	const { onMenuToggle }: { onMenuToggle?: () => void } = $props();
+
 	const auth = getAuthStore();
 
 	let showMenu = $state(false);
@@ -28,7 +30,14 @@
 <svelte:window onclick={closeMenu} />
 
 <header class="h-14 bg-surface border-b border-[rgba(255,255,255,0.08)] flex items-center justify-between px-6 sticky top-0 z-20">
-	<div></div>
+	<div class="flex items-center gap-3">
+		<!-- Hamburger menu button (mobile only) -->
+		<button class="md:hidden p-1.5 text-text-secondary hover:text-white transition-colors -ml-1.5" onclick={onMenuToggle}>
+			<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+			</svg>
+		</button>
+	</div>
 
 	<!-- User menu -->
 	<div class="relative">

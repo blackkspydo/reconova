@@ -8,6 +8,7 @@
 	const auth = getAuthStore();
 
 	let initialized = $state(false);
+	let sidebarOpen = $state(false);
 
 	$effect(() => {
 		if (!initialized) {
@@ -36,9 +37,9 @@
 	</div>
 {:else if auth.isAuthenticated && auth.user?.role === 'SUPER_ADMIN'}
 	<div class="flex min-h-screen bg-bg text-white">
-		<Sidebar isAdmin={true} />
+		<Sidebar isAdmin={true} open={sidebarOpen} onclose={() => sidebarOpen = false} />
 		<div class="flex-1 flex flex-col min-h-screen">
-			<Header />
+			<Header onMenuToggle={() => sidebarOpen = !sidebarOpen} />
 			<main class="flex-1 p-6">
 				{@render children()}
 			</main>

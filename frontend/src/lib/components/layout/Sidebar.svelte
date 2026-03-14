@@ -64,7 +64,7 @@
 		{ label: 'Settings', href: '/settings', icon: 'settings' },
 	];
 
-	const { isAdmin = false }: { isAdmin?: boolean } = $props();
+	const { isAdmin = false, open = false, onclose }: { isAdmin?: boolean; open?: boolean; onclose?: () => void } = $props();
 
 	const adminItems: NavItem[] = [
 		{ label: 'Users', href: '/admin/users', icon: 'users' },
@@ -78,6 +78,10 @@
 	function isActive(href: string): boolean {
 		return page.url.pathname === href || page.url.pathname.startsWith(href + '/');
 	}
+
+	function handleNavClick() {
+		onclose?.();
+	}
 </script>
 
 {#snippet navIcon(icon: string)}
@@ -90,16 +94,24 @@
 	{/if}
 {/snippet}
 
-<aside class="w-60 bg-surface border-r border-[rgba(255,255,255,0.08)] flex flex-col h-screen sticky top-0">
+{#snippet sidebarContent()}
 	<!-- Logo -->
 	<div class="px-5 py-5 border-b border-[rgba(255,255,255,0.08)]">
-		<div class="flex items-center gap-2.5">
-			<div class="size-7 text-brand">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-				</svg>
+		<div class="flex items-center justify-between">
+			<div class="flex items-center gap-2.5">
+				<div class="size-7 text-brand">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+					</svg>
+				</div>
+				<span class="text-lg font-semibold tracking-wider uppercase text-white">Reconova<span class="text-brand">.</span></span>
 			</div>
-			<span class="text-lg font-semibold tracking-wider uppercase text-white">Reconova<span class="text-brand">.</span></span>
+			<!-- Close button (mobile only) -->
+			<button class="md:hidden p-1 text-text-muted hover:text-white transition-colors" onclick={onclose}>
+				<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+				</svg>
+			</button>
 		</div>
 	</div>
 
@@ -110,6 +122,7 @@
 			<a
 				href={item.href}
 				class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {isActive(item.href) ? 'bg-brand/10 text-brand' : 'text-text-secondary hover:text-white hover:bg-[rgba(255,255,255,0.04)]'}"
+				onclick={handleNavClick}
 			>
 				{@render navIcon(item.icon)}
 				{item.label}
@@ -122,6 +135,7 @@
 				<a
 					href={item.href}
 					class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {isActive(item.href) ? 'bg-brand/10 text-brand' : 'text-text-secondary hover:text-white hover:bg-[rgba(255,255,255,0.04)]'}"
+					onclick={handleNavClick}
 				>
 					{@render navIcon(item.icon)}
 					{item.label}
@@ -129,4 +143,19 @@
 			{/each}
 		{/if}
 	</nav>
+{/snippet}
+
+<!-- Desktop sidebar -->
+<aside class="hidden md:flex w-60 bg-surface border-r border-[rgba(255,255,255,0.08)] flex-col h-screen sticky top-0">
+	{@render sidebarContent()}
 </aside>
+
+<!-- Mobile overlay sidebar -->
+{#if open}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="fixed inset-0 z-40 bg-black/50 md:hidden" onclick={onclose}></div>
+	<aside class="fixed inset-y-0 left-0 z-50 w-60 bg-surface border-r border-[rgba(255,255,255,0.08)] flex flex-col md:hidden">
+		{@render sidebarContent()}
+	</aside>
+{/if}
