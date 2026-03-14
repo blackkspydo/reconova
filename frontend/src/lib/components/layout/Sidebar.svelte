@@ -30,6 +30,9 @@
 		building: [
 			'M2.25 21h19.5M3.75 3v18m16.5-18v18M5.25 3h13.5M5.25 3v3m13.5-3v3M8.25 21V10.5m0 0h7.5m-7.5 0V6m7.5 4.5V6m0 4.5V21m-3.75-6h.008v.008h-.008V15Zm0 3h.008v.008h-.008V18Z',
 		],
+		tag: [
+			'M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z M6 6h.008v.008H6V6Z',
+		],
 	};
 
 	const navItems: NavItem[] = [
@@ -45,6 +48,7 @@
 	const adminItems: NavItem[] = [
 		{ label: 'Users', href: '/admin/users', icon: 'users' },
 		{ label: 'Tenants', href: '/admin/tenants', icon: 'building' },
+		{ label: 'Pricing', href: '/admin/pricing', icon: 'tag' },
 	];
 
 	function isActive(href: string): boolean {

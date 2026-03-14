@@ -51,6 +51,8 @@ export interface CreditPack {
 	name: string;
 	credits: number;
 	price: number;
+	bonus_credits: number;
+	popular: boolean;
 	status: 'ACTIVE' | 'ARCHIVED';
 }
 

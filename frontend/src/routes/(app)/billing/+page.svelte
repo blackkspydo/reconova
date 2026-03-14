@@ -224,7 +224,9 @@
 					</div>
 
 					<div class="mt-5">
-						<Button variant="primary">Purchase Credits</Button>
+						<a href="/billing/credits">
+							<Button variant="primary">Purchase Credits</Button>
+						</a>
 					</div>
 				</div>
 			{/if}
