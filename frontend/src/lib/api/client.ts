@@ -114,20 +114,20 @@ export const authApi = {
 
 	logout: () => api('/auth/logout', { method: 'POST' }),
 
-	me: () => api('/auth/me'),
+	me: () => api('/users/me'),
 
 	forgotPassword: (body: { email: string }) =>
-		api('/auth/password/forgot', { method: 'POST', body, skipAuth: true }),
+		api('/auth/forgot-password', { method: 'POST', body, skipAuth: true }),
 
 	changePassword: (body: { currentPassword?: string; newPassword: string }, tempToken?: string) =>
-		api('/auth/password/change', {
+		api('/auth/change-password', {
 			method: 'POST',
 			body,
 			headers: tempToken ? { Authorization: `Bearer ${tempToken}` } : {},
 		}),
 
 	get2faSetup: (tempToken: string) =>
-		api('/auth/2fa/setup', {
+		api('/auth/2fa/enable', {
 			headers: { Authorization: `Bearer ${tempToken}` },
 		}),
 
@@ -138,7 +138,31 @@ export const authApi = {
 			headers: tempToken ? { Authorization: `Bearer ${tempToken}` } : {},
 		}),
 
+	disable2fa: () => api('/auth/2fa/disable', { method: 'POST' }),
+
+	getSessions: () => api('/auth/sessions'),
+
+	revokeSession: (sessionId: string) => api(`/auth/sessions/${sessionId}`, { method: 'DELETE' }),
+
+	logoutAll: () => api('/auth/logout-all', { method: 'POST' }),
+
 	refresh: () => api('/auth/refresh', { method: 'POST', skipAuth: true }),
+};
+
+// Users API (tenant-level user management)
+export const usersApi = {
+	me: () => api('/users/me'),
+	list: () => api('/users'),
+	get: (id: string) => api(`/users/${id}`),
+	create: (body: { email: string; role: string }) => api('/users', { method: 'POST', body }),
+	update: (id: string, body: { role?: string }) => api(`/users/${id}`, { method: 'PUT', body }),
+	delete: (id: string) => api(`/users/${id}`, { method: 'DELETE' }),
+};
+
+// Tenants API
+export const tenantsApi = {
+	getCurrent: () => api('/tenants/current'),
+	updateCurrent: (body: { name?: string }) => api('/tenants/current', { method: 'PUT', body }),
 };
 
 export const adminApi = {
@@ -193,6 +217,8 @@ export const domainApi = {
 	get: (id: string) => api(`/domains/${id}`),
 	create: (body: { domain: string }) => api('/domains', { method: 'POST', body }),
 	delete: (id: string) => api(`/domains/${id}`, { method: 'DELETE' }),
+	initiateVerification: (id: string) => api(`/domains/${id}/verify/initiate`, { method: 'POST' }),
+	verify: (id: string) => api(`/domains/${id}/verify`, { method: 'POST' }),
 	getSubdomains: (id: string, params?: { page?: number; size?: number }) => {
 		const sp = new URLSearchParams();
 		if (params?.page) sp.set('page', String(params.page));
@@ -238,6 +264,14 @@ export const scanApi = {
 		const qs = checkType ? `?check_type=${checkType}` : '';
 		return api(`/scans/${id}/results${qs}`);
 	},
+	getVulnerabilities: (params?: Record<string, string | number | undefined>) => {
+		const sp = new URLSearchParams();
+		if (params) for (const [k, v] of Object.entries(params)) if (v !== undefined) sp.set(k, String(v));
+		const qs = sp.toString();
+		return api(`/scans/vulnerabilities${qs ? `?${qs}` : ''}`);
+	},
+	getVulnerability: (id: string) => api(`/scans/vulnerabilities/${id}`),
+	resolveVulnerability: (id: string) => api(`/scans/vulnerabilities/${id}/resolve`, { method: 'POST' }),
 };
 
 // Workflow API
@@ -249,6 +283,15 @@ export const workflowApi = {
 	update: (id: string, body: { name?: string; steps_json?: { check_type: string; config?: Record<string, unknown> }[] }) =>
 		api(`/workflows/${id}`, { method: 'PUT', body }),
 	delete: (id: string) => api(`/workflows/${id}`, { method: 'DELETE' }),
+	getTemplates: () => api('/workflows/templates'),
+	getTemplate: (id: string) => api(`/workflows/templates/${id}`),
+	createTemplate: (body: { name: string; steps_json: { check_type: string; config?: Record<string, unknown> }[] }) =>
+		api('/workflows/templates', { method: 'POST', body }),
+	updateTemplate: (id: string, body: { name?: string; steps_json?: { check_type: string; config?: Record<string, unknown> }[] }) =>
+		api(`/workflows/templates/${id}`, { method: 'PUT', body }),
+	deleteTemplate: (id: string) => api(`/workflows/templates/${id}`, { method: 'DELETE' }),
+	execute: (body: { workflow_id: string; domain_id: string }) =>
+		api('/workflows/execute', { method: 'POST', body }),
 };
 
 // Schedule API

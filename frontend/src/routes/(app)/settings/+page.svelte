@@ -6,6 +6,7 @@
 	import { validatePassword } from '$lib/utils/validation';
 	import { api, authApi } from '$lib/api/client';
 	import type { ApiError, TwoFactorSetupResponse } from '$lib/types/auth';
+	import { onMount } from 'svelte';
 	import QRCode from 'qrcode';
 
 	const auth = getAuthStore();
@@ -31,8 +32,85 @@
 	let otpCode = $state('');
 	let isVerifying2fa = $state(false);
 
-	// ── Logout state ──
+	// ── Session state ──
 	let isLoggingOut = $state(false);
+	let sessions = $state<any[]>([]);
+	let isLoadingSessions = $state(false);
+	let sessionsError = $state<string | null>(null);
+	let revokingSessionId = $state<string | null>(null);
+
+	interface Session {
+		id: string;
+		ip_address?: string;
+		user_agent?: string;
+		created_at?: string;
+		last_active_at?: string;
+		is_current?: boolean;
+	}
+
+	function parseUserAgent(ua?: string): string {
+		if (!ua) return 'Unknown Device';
+		// Try to extract browser and OS
+		let browser = 'Unknown Browser';
+		let os = 'Unknown OS';
+
+		if (ua.includes('Firefox')) browser = 'Firefox';
+		else if (ua.includes('Edg/')) browser = 'Edge';
+		else if (ua.includes('Chrome')) browser = 'Chrome';
+		else if (ua.includes('Safari')) browser = 'Safari';
+		else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera';
+
+		if (ua.includes('Windows')) os = 'Windows';
+		else if (ua.includes('Mac OS')) os = 'macOS';
+		else if (ua.includes('Linux')) os = 'Linux';
+		else if (ua.includes('Android')) os = 'Android';
+		else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+		return `${browser} on ${os}`;
+	}
+
+	function formatTimestamp(ts?: string): string {
+		if (!ts) return '—';
+		return new Date(ts).toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+	}
+
+	async function loadSessions() {
+		isLoadingSessions = true;
+		sessionsError = null;
+		try {
+			const res = await authApi.getSessions() as Session[];
+			sessions = res;
+		} catch (err) {
+			const apiErr = err as ApiError;
+			sessionsError = apiErr.message || 'Failed to load sessions.';
+		} finally {
+			isLoadingSessions = false;
+		}
+	}
+
+	async function handleRevokeSession(sessionId: string) {
+		revokingSessionId = sessionId;
+		try {
+			await authApi.revokeSession(sessionId);
+			sessions = sessions.filter((s: Session) => s.id !== sessionId);
+			toast.success('Session revoked successfully.');
+		} catch (err) {
+			const apiErr = err as ApiError;
+			toast.error(apiErr.message || 'Failed to revoke session.');
+		} finally {
+			revokingSessionId = null;
+		}
+	}
+
+	onMount(() => {
+		loadSessions();
+	});
 
 	// ── Derived ──
 	let passwordValidation = $derived(validatePassword(newPassword));
@@ -422,11 +500,72 @@
 	<!-- ═══════════════ Active Sessions ═══════════════ -->
 	<div class="mt-6 mb-8 bg-surface rounded-xl border border-[rgba(255,255,255,0.08)] p-6">
 		<h2 class="text-lg font-semibold text-white mb-4">Active Sessions</h2>
-		<p class="text-sm text-text-secondary mb-4">
-			You are currently logged in. To sign out of all sessions, click below.
-		</p>
-		<Button variant="destructive" onclick={handleLogoutAll} loading={isLoggingOut}>
-			{isLoggingOut ? 'Signing out...' : 'Sign Out All Sessions'}
-		</Button>
+
+		{#if isLoadingSessions}
+			<div class="flex items-center justify-center py-8">
+				<svg class="w-6 h-6 animate-spin text-brand" fill="none" viewBox="0 0 24 24">
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+					<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+				</svg>
+			</div>
+		{:else if sessionsError}
+			<Alert variant="error">{sessionsError}</Alert>
+		{:else if sessions.length === 0}
+			<p class="text-sm text-text-secondary">No active sessions found.</p>
+		{:else}
+			<div class="flex flex-col gap-3 mb-5">
+				{#each sessions as session (session.id)}
+					<div class="flex items-center justify-between gap-4 rounded-lg border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-4 py-3">
+						<div class="flex-1 min-w-0">
+							<div class="flex items-center gap-2 mb-1">
+								<span class="text-sm font-medium text-white truncate">
+									{parseUserAgent(session.user_agent)}
+								</span>
+								{#if session.is_current}
+									<span class="shrink-0 inline-flex items-center rounded-full bg-green-500/15 px-2 py-0.5 text-[11px] font-medium text-green-400 ring-1 ring-inset ring-green-500/25">
+										Current
+									</span>
+								{/if}
+							</div>
+							<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
+								{#if session.ip_address}
+									<span>IP: {session.ip_address}</span>
+								{/if}
+								{#if session.created_at}
+									<span>Created: {formatTimestamp(session.created_at)}</span>
+								{/if}
+								{#if session.last_active_at}
+									<span>Last active: {formatTimestamp(session.last_active_at)}</span>
+								{/if}
+							</div>
+						</div>
+						{#if !session.is_current}
+							<button
+								class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all bg-brand text-white hover:bg-brand-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+								onclick={() => handleRevokeSession(session.id)}
+								disabled={revokingSessionId !== null}
+							>
+								{#if revokingSessionId === session.id}
+									<svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									</svg>
+									Revoking...
+								{:else}
+									Revoke
+								{/if}
+							</button>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		{/if}
+
+		<div class="mt-4 pt-4 border-t border-[rgba(255,255,255,0.06)]">
+			<p class="text-xs text-text-muted mb-3">Sign out of all sessions including this one.</p>
+			<Button variant="destructive" onclick={handleLogoutAll} loading={isLoggingOut}>
+				{isLoggingOut ? 'Signing out...' : 'Sign Out All Sessions'}
+			</Button>
+		</div>
 	</div>
 </div>

@@ -6,11 +6,20 @@
 	import type { ApiError } from '$lib/types/auth';
 	import { Button, Alert } from '$lib/components/ui';
 	import { Pagination, StatusBadge, EmptyState, SkeletonLoader } from '$lib/components/shared';
+	import { getToastStore } from '$lib/stores/toast';
+
+	const toast = getToastStore();
 
 	// Domain state
 	let domain = $state<DomainDetails | null>(null);
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
+
+	// Verification state
+	let isInitiating = $state(false);
+	let isVerifying = $state(false);
+	let verificationData = $state<{ txt_record_name: string; txt_record_value: string } | null>(null);
+	let verifyError = $state<string | null>(null);
 
 	// Tab state
 	let activeTab = $state<'overview' | 'scans'>('overview');
@@ -106,6 +115,36 @@
 		}
 	}
 
+	async function initiateVerification() {
+		isInitiating = true;
+		verifyError = null;
+		try {
+			const res = (await domainApi.initiateVerification(page.params.id)) as { txt_record_name: string; txt_record_value: string };
+			verificationData = res;
+		} catch (err) {
+			const apiErr = err as ApiError;
+			verifyError = apiErr.message || 'Failed to initiate verification.';
+		} finally {
+			isInitiating = false;
+		}
+	}
+
+	async function verifyDomain() {
+		isVerifying = true;
+		verifyError = null;
+		try {
+			await domainApi.verify(page.params.id);
+			verificationData = null;
+			toast.success('Domain verified successfully!');
+			await loadDomain();
+		} catch (err) {
+			const apiErr = err as ApiError;
+			verifyError = apiErr.message || 'DNS record not found yet. Please wait for DNS propagation.';
+		} finally {
+			isVerifying = false;
+		}
+	}
+
 	$effect(() => {
 		loadDomain();
 		loadSubdomains();
@@ -185,6 +224,63 @@
 			<h1 class="text-2xl font-bold text-white">{domain.domain}</h1>
 			<StatusBadge status={domain.status} size="md" />
 		</div>
+
+		<!-- Verification Section -->
+		{#if domain.status === 'PENDING_VERIFICATION' || domain.status === 'PENDING'}
+			<div class="bg-warning/5 border border-warning/20 rounded-xl p-5 mb-6">
+				<div class="flex items-start gap-3">
+					<div class="flex-shrink-0 mt-0.5">
+						<svg class="w-5 h-5 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+						</svg>
+					</div>
+					<div class="flex-1">
+						<h3 class="text-white font-semibold text-sm mb-1">Domain Verification Required</h3>
+						<p class="text-text-secondary text-sm mb-4">
+							This domain needs to be verified before you can run scans. Add a DNS TXT record to prove ownership.
+						</p>
+
+						{#if verifyError}
+							<div class="mb-4">
+								<Alert variant="error">{verifyError}</Alert>
+							</div>
+						{/if}
+
+						{#if !verificationData}
+							<Button variant="primary" onclick={initiateVerification} loading={isInitiating}>
+								Start Verification
+							</Button>
+						{:else}
+							<div class="bg-[rgba(0,0,0,0.3)] rounded-lg border border-[rgba(255,255,255,0.08)] p-4 mb-4">
+								<p class="text-xs text-text-muted uppercase tracking-wider mb-3 font-semibold">
+									Add the following TXT record to your DNS configuration
+								</p>
+								<div class="space-y-3">
+									<div>
+										<label class="text-xs text-text-muted mb-1 block">Record Name</label>
+										<div class="bg-[rgba(0,0,0,0.4)] rounded-md px-3 py-2 font-mono text-sm text-text border border-[rgba(255,255,255,0.06)] select-all">
+											{verificationData.txt_record_name}
+										</div>
+									</div>
+									<div>
+										<label class="text-xs text-text-muted mb-1 block">Record Value</label>
+										<div class="bg-[rgba(0,0,0,0.4)] rounded-md px-3 py-2 font-mono text-sm text-text border border-[rgba(255,255,255,0.06)] select-all break-all">
+											{verificationData.txt_record_value}
+										</div>
+									</div>
+								</div>
+							</div>
+							<p class="text-text-muted text-xs mb-4">
+								After adding the record, DNS propagation may take a few minutes. Click below to check.
+							</p>
+							<Button variant="primary" onclick={verifyDomain} loading={isVerifying}>
+								Verify Now
+							</Button>
+						{/if}
+					</div>
+				</div>
+			</div>
+		{/if}
 
 		<!-- Stats Summary -->
 		<div class="grid grid-cols-3 gap-4 mb-6">

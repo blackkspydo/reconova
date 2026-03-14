@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { scanApi, domainApi } from '$lib/api/client';
 	import { Button, Alert } from '$lib/components/ui';
-	import { Pagination, StatusBadge, EmptyState, SkeletonLoader } from '$lib/components/shared';
+	import { Pagination, StatusBadge, EmptyState, SkeletonLoader, ScanSubNav } from '$lib/components/shared';
 	import { goto } from '$app/navigation';
 	import type { ScanJob, Paginated } from '$lib/types/scans';
 	import type { Domain } from '$lib/types/domains';
@@ -127,6 +127,8 @@
 		</div>
 		<Button variant="primary" onclick={() => goto('/scans/new')}>New Scan</Button>
 	</div>
+
+	<ScanSubNav />
 
 	<!-- Filters -->
 	<div class="flex gap-3 mb-6">

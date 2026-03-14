@@ -4,3 +4,4 @@ export { default as StatusBadge } from './StatusBadge.svelte';
 export { default as SeverityBadge } from './SeverityBadge.svelte';
 export { default as EmptyState } from './EmptyState.svelte';
 export { default as SkeletonLoader } from './SkeletonLoader.svelte';
+export { default as ScanSubNav } from './ScanSubNav.svelte';

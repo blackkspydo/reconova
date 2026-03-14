@@ -2,7 +2,7 @@
 	import { workflowApi } from '$lib/api/client';
 	import type { Workflow, WorkflowTemplate, WorkflowStepDefinition } from '$lib/types/scans';
 	import { Button, Alert } from '$lib/components/ui';
-	import { EmptyState, SkeletonLoader } from '$lib/components/shared';
+	import { EmptyState, SkeletonLoader, ScanSubNav } from '$lib/components/shared';
 	import { Modal } from '$lib/components/shared';
 	import { goto } from '$app/navigation';
 	import type { ApiError } from '$lib/types/auth';
@@ -75,6 +75,8 @@
 			<p class="text-text-secondary text-sm mt-1">Manage scan workflow templates and custom pipelines</p>
 		</div>
 	</div>
+
+	<ScanSubNav />
 
 	{#if error}
 		<Alert variant="error">{error}</Alert>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { scheduleApi, domainApi } from '$lib/api/client';
 	import { Button, Alert } from '$lib/components/ui';
-	import { Modal, Pagination, EmptyState, SkeletonLoader } from '$lib/components/shared';
+	import { Modal, Pagination, EmptyState, SkeletonLoader, ScanSubNav } from '$lib/components/shared';
 	import { goto } from '$app/navigation';
 	import type { ScanSchedule } from '$lib/types/scans';
 	import type { Domain } from '$lib/types/domains';
@@ -145,6 +145,8 @@
 		</div>
 		<Button variant="primary" onclick={() => goto('/scans/schedules/new')}>New Schedule</Button>
 	</div>
+
+	<ScanSubNav />
 
 	<!-- Filters -->
 	<div class="flex gap-3 mb-6">
