@@ -1,8 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { getAuthStore } from '$lib/stores/auth';
 
-	onMount(() => {
-		goto('/auth/login');
+	const auth = getAuthStore();
+
+	$effect(() => {
+		auth.loadUser().then(() => {
+			if (auth.isAuthenticated) {
+				goto('/dashboard');
+			} else {
+				goto('/auth/login');
+			}
+		});
 	});
 </script>

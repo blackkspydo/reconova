@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { AuthLogo, AuthGlow, AuthCard } from '$lib/components/auth';
 	import { TextInput, Button, Alert } from '$lib/components/ui';
+	import { getAuthStore } from '$lib/stores/auth';
+	import type { ApiError } from '$lib/types/auth';
+
+	const auth = getAuthStore();
 
 	let email = $state('');
 	let isSubmitting = $state(false);
@@ -15,11 +19,10 @@
 		error = null;
 
 		try {
-			// TODO: POST /api/auth/password/forgot { email }
-			console.log('Forgot password:', email);
+			await auth.forgotPassword(email);
 			isSuccess = true;
-		} catch {
-			error = 'Something went wrong. Please try again.';
+		} catch (err) {
+			error = (err as ApiError).message ?? 'Something went wrong. Please try again.';
 		} finally {
 			isSubmitting = false;
 		}

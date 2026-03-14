@@ -1,6 +1,11 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { AuthLogo, AuthGlow, AuthCard } from '$lib/components/auth';
 	import { OtpInput, Button, Alert } from '$lib/components/ui';
+	import { getAuthStore } from '$lib/stores/auth';
+	import type { ApiError } from '$lib/types/auth';
+
+	const auth = getAuthStore();
 
 	let otpCode = $state('');
 	let isSubmitting = $state(false);
@@ -14,10 +19,10 @@
 		error = null;
 
 		try {
-			// TODO: POST /api/auth/2fa/verify { totp_code }
-			console.log('2FA Verify:', otpCode);
-		} catch {
-			error = 'Invalid code. Try again.';
+			await auth.verify2fa(otpCode);
+			goto('/dashboard');
+		} catch (err) {
+			error = (err as ApiError).message ?? 'Invalid code. Try again.';
 			otpCode = '';
 		} finally {
 			isSubmitting = false;

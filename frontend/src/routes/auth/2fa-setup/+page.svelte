@@ -1,6 +1,11 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { AuthLogo, AuthGlow, AuthCard } from '$lib/components/auth';
 	import { OtpInput, Button, Alert } from '$lib/components/ui';
+	import { getAuthStore } from '$lib/stores/auth';
+	import type { ApiError } from '$lib/types/auth';
+
+	const auth = getAuthStore();
 
 	let otpCode = $state('');
 	let isSubmitting = $state(false);
@@ -8,14 +13,19 @@
 	let error = $state<string | null>(null);
 	let showManualKey = $state(false);
 
-	// TODO: Fetch from GET /api/auth/2fa/setup
 	let qrUri = $state('');
-	let manualKey = $state('JBSW Y3DP EHPK 3PXP');
+	let manualKey = $state('');
 
-	// Simulate loading
 	$effect(() => {
-		const timer = setTimeout(() => { isLoading = false; }, 800);
-		return () => clearTimeout(timer);
+		auth.get2faSetup()
+			.then((res) => {
+				qrUri = res.qrUri;
+				manualKey = res.secret;
+				isLoading = false;
+			})
+			.catch(() => {
+				goto('/auth/login');
+			});
 	});
 
 	async function handleSubmit(e: Event) {
@@ -26,10 +36,14 @@
 		error = null;
 
 		try {
-			// TODO: POST /api/auth/2fa/verify { totp_code }
-			console.log('2FA Setup Verify:', otpCode);
-		} catch {
-			error = 'Invalid code. Check your authenticator and try again.';
+			await auth.verify2fa(otpCode);
+			goto('/dashboard');
+		} catch (err) {
+			if ((err as ApiError).message) {
+				error = (err as ApiError).message;
+			} else {
+				error = 'Invalid code. Check your authenticator and try again.';
+			}
 			otpCode = '';
 		} finally {
 			isSubmitting = false;

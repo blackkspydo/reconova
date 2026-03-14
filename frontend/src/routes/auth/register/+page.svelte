@@ -1,6 +1,11 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { AuthLogo, AuthGlow, AuthCard } from '$lib/components/auth';
 	import { TextInput, PasswordInput, PasswordStrength, Button, StepIndicator, Alert } from '$lib/components/ui';
+	import { getAuthStore } from '$lib/stores/auth';
+	import type { ApiError } from '$lib/types/auth';
+
+	const auth = getAuthStore();
 
 	let currentStep = $state<1 | 2>(1);
 	let isSubmitting = $state(false);
@@ -44,10 +49,10 @@
 		error = null;
 
 		try {
-			// TODO: POST /api/auth/register { email, password, tenantName }
-			console.log('Register:', { email, password, tenantName });
-		} catch {
-			error = 'Something went wrong. Please try again.';
+			await auth.register(email, password, tenantName);
+			goto('/auth/2fa-setup');
+		} catch (err) {
+			error = (err as ApiError).message ?? 'Something went wrong. Please try again.';
 		} finally {
 			isSubmitting = false;
 		}

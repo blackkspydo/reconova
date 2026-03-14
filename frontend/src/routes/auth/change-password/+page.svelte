@@ -1,7 +1,12 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { AuthLogo, AuthGlow, AuthCard } from '$lib/components/auth';
 	import { PasswordInput, PasswordStrength, Button, Alert } from '$lib/components/ui';
+	import { getAuthStore } from '$lib/stores/auth';
+	import type { ApiError } from '$lib/types/auth';
+
+	const auth = getAuthStore();
 
 	let newPassword = $state('');
 	let confirmPassword = $state('');
@@ -32,10 +37,10 @@
 		error = null;
 
 		try {
-			// TODO: POST /api/auth/password/change { new_password }
-			console.log('Change password:', { newPassword });
-		} catch {
-			error = 'Something went wrong. Please try again.';
+			await auth.changePassword(newPassword);
+			goto('/auth/login');
+		} catch (err) {
+			error = (err as ApiError).message ?? 'Something went wrong. Please try again.';
 		} finally {
 			isSubmitting = false;
 		}
