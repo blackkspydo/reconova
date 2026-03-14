@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { getAuthStore } from '$lib/stores/auth';
+	import { authApi } from '$lib/api/client';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 
@@ -19,6 +20,18 @@
 	$effect(() => {
 		if (!auth.isLoading && !auth.isAuthenticated && initialized) {
 			goto('/auth/login');
+		}
+	});
+
+	// Proactive token refresh every 4 minutes
+	$effect(() => {
+		if (auth.isAuthenticated) {
+			const interval = setInterval(() => {
+				authApi.refresh().catch(() => {
+					// Refresh failed - will be handled by 401 interceptor on next request
+				});
+			}, 4 * 60 * 1000);
+			return () => clearInterval(interval);
 		}
 	});
 </script>

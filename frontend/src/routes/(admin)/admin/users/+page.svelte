@@ -136,7 +136,7 @@
 							<td class="px-4 py-3 text-sm {user.twoFactorEnabled ? 'text-success' : 'text-text-muted'}">{user.twoFactorEnabled ? 'On' : 'Off'}</td>
 							<td class="px-4 py-3 text-sm text-text-secondary">{new Date(user.createdAt).toLocaleDateString()}</td>
 							<td class="px-4 py-3 text-right">
-								<a href="/users/{user.id}" class="text-brand text-sm font-medium hover:text-brand-dark transition-colors">View</a>
+								<a href="/admin/users/{user.id}" class="text-brand text-sm font-medium hover:text-brand-dark transition-colors">View</a>
 							</td>
 						</tr>
 					{:else}

@@ -4,6 +4,7 @@
 	import { OtpInput, Button, Alert } from '$lib/components/ui';
 	import { getAuthStore } from '$lib/stores/auth';
 	import type { ApiError } from '$lib/types/auth';
+	import QRCode from 'qrcode';
 
 	const auth = getAuthStore();
 
@@ -15,6 +16,7 @@
 
 	let qrUri = $state('');
 	let manualKey = $state('');
+	let qrDataUrl = $state('');
 
 	$effect(() => {
 		auth.get2faSetup()
@@ -26,6 +28,18 @@
 			.catch(() => {
 				goto('/auth/login');
 			});
+	});
+
+	$effect(() => {
+		if (qrUri) {
+			QRCode.toDataURL(qrUri, {
+				width: 200,
+				margin: 1,
+				color: { dark: '#000000', light: '#FFFFFF' }
+			}).then((url: string) => {
+				qrDataUrl = url;
+			});
+		}
 	});
 
 	async function handleSubmit(e: Event) {
@@ -99,8 +113,11 @@
 						<p class="text-white text-sm font-medium">Scan this QR code</p>
 						<div class="mt-3 flex justify-center">
 							<div class="w-40 h-40 bg-white rounded-lg p-2 flex items-center justify-center">
-								<!-- TODO: Generate QR from qrUri -->
-								<div class="w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0id2hpdGUiLz48dGV4dCB4PSI1MCIgeT0iNTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LXNpemU9IjEwIiBmaWxsPSIjOTk5Ij5RUiBDb2RlPC90ZXh0Pjwvc3ZnPg==')] bg-contain bg-center bg-no-repeat"></div>
+								{#if qrDataUrl}
+								<img src={qrDataUrl} alt="QR Code" class="w-full h-full" />
+							{:else}
+								<div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">Loading...</div>
+							{/if}
 							</div>
 						</div>
 

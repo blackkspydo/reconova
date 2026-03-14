@@ -119,6 +119,7 @@
 				bind:value={confirmPassword}
 				placeholder="Re-enter new password"
 				error={confirmError}
+				onblur={handleConfirmBlur}
 			/>
 
 			<div class="mt-2">

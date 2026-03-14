@@ -9,9 +9,10 @@
 		placeholder?: string;
 		error?: string | null;
 		labelRight?: import('svelte').Snippet;
+		onblur?: (e: FocusEvent) => void;
 	}
 
-	let { label, id, value = $bindable(''), placeholder = '••••••••', error = null, labelRight }: Props = $props();
+	let { label, id, value = $bindable(''), placeholder = '••••••••', error = null, labelRight, onblur }: Props = $props();
 
 	let showPassword = $state(false);
 </script>
@@ -29,6 +30,7 @@
 			type={showPassword ? 'text' : 'password'}
 			bind:value
 			{placeholder}
+			{onblur}
 			class="w-full rounded-lg border border-[rgba(255,255,255,0.08)] bg-surface text-white placeholder-text-muted focus:ring-1 focus:ring-brand focus:border-brand h-12 px-4 pr-10 text-sm transition-colors outline-none"
 			class:border-danger={error}
 		/>

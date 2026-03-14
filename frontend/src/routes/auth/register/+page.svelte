@@ -117,6 +117,7 @@
 					bind:value={confirmPassword}
 					placeholder="Re-enter your password"
 					error={confirmError}
+					onblur={handleConfirmBlur}
 				/>
 
 				<Button type="submit" variant="primary" fullWidth>
