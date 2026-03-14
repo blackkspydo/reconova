@@ -287,3 +287,111 @@ export const billingApi = {
 	estimateCost: (body: { workflow_steps: string[]; domain_count: number }) =>
 		api('/billing/credits/estimate', { method: 'POST', body }),
 };
+
+// CVE API
+export const cveApi = {
+	search: (params?: Record<string, string | number | undefined>) => {
+		const sp = new URLSearchParams();
+		if (params) for (const [k, v] of Object.entries(params)) if (v !== undefined) sp.set(k, String(v));
+		const qs = sp.toString();
+		return api(`/cve/search${qs ? `?${qs}` : ''}`);
+	},
+	get: (cveId: string) => api(`/cve/${cveId}`),
+	getAlerts: (params?: Record<string, string | number | undefined>) => {
+		const sp = new URLSearchParams();
+		if (params) for (const [k, v] of Object.entries(params)) if (v !== undefined) sp.set(k, String(v));
+		const qs = sp.toString();
+		return api(`/cve/alerts${qs ? `?${qs}` : ''}`);
+	},
+	acknowledgeAlert: (id: string) => api(`/cve/alerts/${id}/acknowledge`, { method: 'POST' }),
+	resolveAlert: (id: string) => api(`/cve/alerts/${id}/resolve`, { method: 'POST' }),
+};
+
+// Integrations API
+export const integrationsApi = {
+	list: () => api('/integrations'),
+	get: (id: string) => api(`/integrations/${id}`),
+	create: (body: { type: string; name: string; config: Record<string, unknown> }) =>
+		api('/integrations', { method: 'POST', body }),
+	update: (id: string, body: { name?: string; config?: Record<string, unknown>; enabled?: boolean }) =>
+		api(`/integrations/${id}`, { method: 'PUT', body }),
+	delete: (id: string) => api(`/integrations/${id}`, { method: 'DELETE' }),
+	test: (id: string) => api(`/integrations/${id}/test`, { method: 'POST' }),
+	getRules: () => api('/integrations/rules'),
+	createRule: (body: { integration_id: string; event_type: string; severity_filter: string[] }) =>
+		api('/integrations/rules', { method: 'POST', body }),
+	updateRule: (id: string, body: { event_type?: string; severity_filter?: string[]; enabled?: boolean }) =>
+		api(`/integrations/rules/${id}`, { method: 'PUT', body }),
+	deleteRule: (id: string) => api(`/integrations/rules/${id}`, { method: 'DELETE' }),
+};
+
+// Compliance API
+export const complianceApi = {
+	getFrameworks: () => api('/compliance/frameworks'),
+	getFramework: (id: string) => api(`/compliance/frameworks/${id}`),
+	getControls: (frameworkId: string) => api(`/compliance/frameworks/${frameworkId}/controls`),
+	runAssessment: (body: { framework_id: string }) =>
+		api('/compliance/assessments', { method: 'POST', body }),
+	getAssessments: (params?: Record<string, string | number | undefined>) => {
+		const sp = new URLSearchParams();
+		if (params) for (const [k, v] of Object.entries(params)) if (v !== undefined) sp.set(k, String(v));
+		const qs = sp.toString();
+		return api(`/compliance/assessments${qs ? `?${qs}` : ''}`);
+	},
+	getAssessment: (id: string) => api(`/compliance/assessments/${id}`),
+};
+
+// Admin Config API
+export const adminConfigApi = {
+	list: () => api('/admin/config'),
+	get: (key: string) => api(`/admin/config/${key}`),
+	reveal: (key: string) => api(`/admin/config/${key}/reveal`),
+	update: (key: string, body: { value: string; reason?: string }) =>
+		api(`/admin/config/${key}`, { method: 'PUT', body }),
+	getHistory: (params?: Record<string, string | number | undefined>) => {
+		const sp = new URLSearchParams();
+		if (params) for (const [k, v] of Object.entries(params)) if (v !== undefined) sp.set(k, String(v));
+		const qs = sp.toString();
+		return api(`/admin/config/history${qs ? `?${qs}` : ''}`);
+	},
+	rollback: (id: string) => api(`/admin/config/history/${id}/rollback`, { method: 'POST' }),
+	createChangeRequest: (body: { key: string; proposed_value: string; reason: string }) =>
+		api('/admin/config/requests', { method: 'POST', body }),
+	getChangeRequests: (params?: Record<string, string | undefined>) => {
+		const sp = new URLSearchParams();
+		if (params) for (const [k, v] of Object.entries(params)) if (v !== undefined) sp.set(k, String(v));
+		const qs = sp.toString();
+		return api(`/admin/config/requests${qs ? `?${qs}` : ''}`);
+	},
+	approveRequest: (id: string) => api(`/admin/config/requests/${id}/approve`, { method: 'POST' }),
+	rejectRequest: (id: string) => api(`/admin/config/requests/${id}/reject`, { method: 'POST' }),
+	getCacheStatus: () => api('/admin/config/cache/status'),
+	invalidateCache: () => api('/admin/config/cache/invalidate', { method: 'POST' }),
+};
+
+// Admin Audit API
+export const adminAuditApi = {
+	list: (params?: Record<string, string | number | undefined>) => {
+		const sp = new URLSearchParams();
+		if (params) for (const [k, v] of Object.entries(params)) if (v !== undefined) sp.set(k, String(v));
+		const qs = sp.toString();
+		return api(`/admin/audit${qs ? `?${qs}` : ''}`);
+	},
+};
+
+// Feature Flags API
+export const featureFlagsApi = {
+	evaluate: () => api('/feature-flags/evaluate'),
+	evaluateFlag: (key: string) => api(`/feature-flags/evaluate/${key}`),
+	list: () => api('/feature-flags'),
+	create: (body: { key: string; name: string; description?: string; enabled: boolean; tier_gated: boolean; min_tier?: string }) =>
+		api('/feature-flags', { method: 'POST', body }),
+	update: (id: string, body: { name?: string; description?: string; enabled?: boolean; tier_gated?: boolean; min_tier?: string }) =>
+		api(`/feature-flags/${id}`, { method: 'PUT', body }),
+	delete: (id: string) => api(`/feature-flags/${id}`, { method: 'DELETE' }),
+	getOverrides: (tenantId: string) => api(`/feature-flags/overrides/${tenantId}`),
+	setOverride: (tenantId: string, body: { feature_flag_id: string; enabled: boolean }) =>
+		api(`/feature-flags/overrides/${tenantId}`, { method: 'POST', body }),
+	removeOverride: (tenantId: string, featureFlagId: string) =>
+		api(`/feature-flags/overrides/${tenantId}/${featureFlagId}`, { method: 'DELETE' }),
+};
